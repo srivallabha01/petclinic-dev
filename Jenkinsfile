@@ -2,17 +2,17 @@ pipeline {
     agent any
 
     environment {
-        AZURE_HOST = '20.124.67.32'                  // Example: 20.124.67.32
-        AZURE_USER = 'srivallabha'              // Example: srivallabha
-        SSH_KEY_ID = 'azure-ssh-key'               // ID of your SSH key in Jenkins credentials
+        AZURE_HOST = '20.124.67.32'                    // Replace with your VM IP
+        AZURE_USER = 'srivallabha'                     // Your VM username
+        SSH_KEY_ID = 'azure-ssh-key'                   // Jenkins SSH credential ID
         APP_JAR = 'target/spring-petclinic-3.5.0-SNAPSHOT.jar'
-        DEST_PATH = '/home/azure-user/app.jar'
+        DEST_PATH = '/home/srivallabha/app.jar'        // Corrected to match AZURE_USER's home
     }
 
     stages {
         stage('Clone Repository') {
             steps {
-                git 'https://github.com/srivallabha01/petclinic-dev.git'
+                git branch: 'main', url: 'https://github.com/srivallabha01/petclinic-dev.git'
             }
         }
 
@@ -40,9 +40,8 @@ pipeline {
             steps {
                 sshagent([SSH_KEY_ID]) {
                     sh """
-                    ssh -o StrictHostKeyChecking=no ${AZURE_USER}@${AZURE_HOST} '
-                      ansible-playbook -i /home/${AZURE_USER}/hosts /home/${AZURE_USER}/ansible/playbook.yml
-                    '
+                    ssh -o StrictHostKeyChecking=no ${AZURE_USER}@${AZURE_HOST} \\
+                    'ansible-playbook -i /home/${AZURE_USER}/hosts /home/${AZURE_USER}/ansible/playbook.yml'
                     """
                 }
             }
