@@ -1,58 +1,49 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
     include:
-      - main  # change to your default branch
+      - main  # Update if your default branch is different
 
 pool:
   vmImage: 'ubuntu-latest'
 
 variables:
-  AZURE_VM_HOST: 'your-vm-ip'
-  AZURE_VM_USER: 'srivallabha'
-  JAR_PATH: 'target/spring-petclinic-3.5.0-SNAPSHOT.jar'
-  DEST_PATH: '/home/azure-user/app.jar'
+  AZURE_VM_HOST: 'your-vm-ip'  # Replace with your actual Azure VM IP
+  AZURE_VM_USER: 'srivallabha'  # Your actual VM username
+  JAR_NAME: 'spring-petclinic-3.5.0-SNAPSHOT.jar'
+  SOURCE_JAR_PATH: 'target/spring-petclinic-3.5.0-SNAPSHOT.jar'
+  DEST_JAR_PATH: '/home/srivallabha/app.jar'
 
 steps:
-  - task: GitVersion@5
-    displayName: 'Determine Git Version'
-    inputs:
-      useConfigFile: true
 
   - task: Maven@3
-    displayName: 'Build with Maven'
+    displayName: '🔧 Build with Maven'
     inputs:
       mavenPomFile: 'pom.xml'
       goals: 'clean install'
-      options: '-Dmaven.test.skip=false'  # remove to skip tests
+      options: '-Dmaven.test.skip=false'
 
   - script: |
-      echo "Listing JAR file..."
+      echo "📦 Listing build artifacts..."
       ls -lh target/
-    displayName: 'Check JAR Output'
+    displayName: 'List JAR Output'
 
   - task: CopyFilesOverSSH@0
-    displayName: 'Copy JAR to Azure VM'
+    displayName: '📤 Copy JAR to Azure VM'
     inputs:
-      sshEndpoint: 'Azure-VM-SSH'  # you’ll create this in Azure DevOps
+      sshEndpoint: 'Azure-VM-SSH'  # Must be created in Azure DevOps → Service Connections
       sourceFolder: '$(System.DefaultWorkingDirectory)/target'
       contents: '**/*.jar'
-      targetFolder: '/home/azure-user'
+      targetFolder: '/home/srivallabha'
 
   - task: SSH@0
-    displayName: 'Run Ansible Playbook on Azure VM'
+    displayName: '⚙️ Run Ansible Playbook on Azure VM'
     inputs:
       sshEndpoint: 'Azure-VM-SSH'
       runOptions: 'commands'
       command: |
-        cd /home/azure-user
-        ansible-playbook -i hosts ansible/playbook.yml
+        cd /home/srivallabha
+        ansible-playbook -i ansible/hosts ansible/playbook.yml
 
   - script: |
-      echo "✅ Deployment complete."
+      echo "✅ Deployment complete!"
     displayName: 'Done'
-
