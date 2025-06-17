@@ -13,8 +13,8 @@ pool:
 
 variables:
   AZURE_VM_HOST: 'your-vm-ip'
-  AZURE_VM_USER: 'azure-user'
-  JAR_PATH: 'target/*.jar'
+  AZURE_VM_USER: 'srivallabha'
+  JAR_PATH: 'target/spring-petclinic-3.5.0-SNAPSHOT.jar'
   DEST_PATH: '/home/azure-user/app.jar'
 
 steps:
